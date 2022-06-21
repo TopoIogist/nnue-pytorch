@@ -871,7 +871,7 @@ std::function<bool(const TrainingDataEntry&)> make_skip_predicate(bool filtered,
             if (wld_filtered && do_wld_skip())
                 return true;
 
-            constexpr bool do_debug_print = false;
+            constexpr bool do_debug_print = true;
             if (do_debug_print) {
                 if (uint64_t(piece_count_history_all_total) % 10000 == 0) {
                     std::cout << "Total : " << piece_count_history_all_total << '\n';
