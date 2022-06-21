@@ -896,7 +896,7 @@ std::function<void(std::vector<TrainingDataEntry>&)> make_buffer_filter()
         }
         begin = buffer.begin(); // reassign begin because we were using it as a current pointer
 
-        constexpr bool do_debug_print = false;
+        constexpr bool do_debug_print = true;
         if (do_debug_print) {
             int pc_hist2[33] = {0};
             for (auto b = begin; b != end; ++b)
