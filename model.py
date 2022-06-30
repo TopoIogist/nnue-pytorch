@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import pytorch_lightning as pl
 import copy
 from feature_transformer import DoubleFeatureTransformerSlice
+from pytorch_lamb import Lamb
 
 # 3 layer fully connected network
 L1 = 1024
@@ -305,10 +306,10 @@ class NNUE(pl.LightningModule):
     pt = p * actual_lambda + t * (1.0 - actual_lambda)
 
     diff_vec = torch.abs(pt - q)
-    overshoot = (pt >= 0.5) & (q >= pt)
-    undershoot = (pt <= 0.5) & (q <= pt)
-    overshoot_or_undershoot = (overshoot | undershoot)*diff_vec
-    loss = torch.pow(diff_vec-overshoot_or_undershoot*0.3, 2.6).mean()
+    #overshoot = (pt >= 0.5) & (q >= pt)
+    #undershoot = (pt <= 0.5) & (q <= pt)
+    #overshoot_or_undershoot = (overshoot | undershoot)*diff_vec
+    loss = torch.pow(diff_vec, 2.6).mean()
 
     self.log(loss_type, loss)
 
@@ -338,6 +339,7 @@ class NNUE(pl.LightningModule):
     ]
     # Increasing the eps leads to less saturated nets with a few dead neurons.
     # Gradient localisation appears slightly harmful.
-    optimizer = ranger.Ranger(train_params, betas=(.9, 0.999), eps=1.0e-7, gc_loc=False, use_gc=False)
+    #optimizer = ranger.Ranger(train_params, betas=(.9, 0.999), eps=1.0e-7, gc_loc=False, use_gc=False)
+    optimizer = Lamb(train_params,  lr= 1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=0, gc_loc=False, use_gc=False)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=self.gamma)
     return [optimizer], [scheduler]
