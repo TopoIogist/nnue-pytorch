@@ -1,5 +1,6 @@
 import ranger
 import torch
+from pytorch_lamb import Lamb
 from torch import nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
@@ -316,8 +317,17 @@ class NNUE(pl.LightningModule):
     t = outcome
     actual_lambda = self.start_lambda + (self.end_lambda - self.start_lambda) * (self.current_epoch / self.max_epoch)
     pt = pf * actual_lambda + t * (1.0 - actual_lambda)
+    
+    misclassified_threshold = 0.1
+    won_games = (t >= (0.5+misclassified_threshold))
+    loss_games = (t <= (0.5-misclassified_threshold))
+    draw_games = (t >= (0.5-misclassified_threshold)) & (t <= (0.5+misclassified_threshold))
+    misclassified_won = (qf <= (0.5-misclassified_threshold)) & won_games
+    misclassified_loss = (qf >= (0.5+misclassified_threshold)) & loss_games
+    misclassified_draw = ((qf >= (0.5+misclassified_threshold)) | (qf <= (0.5-misclassified_threshold))) & draw_games
+    misclassified = misclassified_won | misclassified_loss | misclassified_draw
 
-    loss = torch.pow(torch.abs(pt - qf), 2.6).mean()
+    loss = torch.pow(torch.abs(pt - qf)+4*min(torch.abs(pt - qf),torch.abs(qf - t))*(misclassified), 1.5).mean()
 
     self.log(loss_type, loss)
 
@@ -347,6 +357,7 @@ class NNUE(pl.LightningModule):
     ]
     # Increasing the eps leads to less saturated nets with a few dead neurons.
     # Gradient localisation appears slightly harmful.
-    optimizer = ranger.Ranger(train_params, betas=(.9, 0.999), eps=1.0e-7, gc_loc=False, use_gc=False)
+ #   optimizer = ranger.Ranger(train_params, betas=(.9, 0.999), eps=1.0e-7, gc_loc=False, use_gc=False)
+    optimizer = Lamb(train_params,  lr= 5e-4, betas=(0.9, 0.999), eps=1e-7, weight_decay=0)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=self.gamma)
     return [optimizer], [scheduler]
