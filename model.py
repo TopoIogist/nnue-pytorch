@@ -318,16 +318,7 @@ class NNUE(pl.LightningModule):
     actual_lambda = self.start_lambda + (self.end_lambda - self.start_lambda) * (self.current_epoch / self.max_epoch)
     pt = pf * actual_lambda + t * (1.0 - actual_lambda)
     
-    misclassified_threshold = 0.1
-    won_games = (t >= (0.5+misclassified_threshold))
-    loss_games = (t <= (0.5-misclassified_threshold))
-    draw_games = (t >= (0.5-misclassified_threshold)) & (t <= (0.5+misclassified_threshold))
-    misclassified_won = (qf <= (0.5-misclassified_threshold)) & won_games
-    misclassified_loss = (qf >= (0.5+misclassified_threshold)) & loss_games
-    misclassified_draw = ((qf >= (0.5+misclassified_threshold)) | (qf <= (0.5-misclassified_threshold))) & draw_games
-    misclassified = misclassified_won | misclassified_loss | misclassified_draw
-
-    loss = torch.pow(torch.abs(pt - qf)+4*torch.min(torch.abs(pt - qf),torch.abs(qf - t))*(misclassified), 1.5).mean()
+    loss = torch.pow(torch.abs(pt - qf), 2.6).mean()
 
     self.log(loss_type, loss)
 
