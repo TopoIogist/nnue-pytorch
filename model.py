@@ -1,6 +1,6 @@
 import ranger
 import torch
-from pytorch_lamb import Lamb
+import apex
 from torch import nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
@@ -349,6 +349,7 @@ class NNUE(pl.LightningModule):
     # Increasing the eps leads to less saturated nets with a few dead neurons.
     # Gradient localisation appears slightly harmful.
  #   optimizer = ranger.Ranger(train_params, betas=(.9, 0.999), eps=1.0e-7, gc_loc=False, use_gc=False)
-    optimizer = Lamb(train_params,  lr= self.lr, betas=(0.9, 0.999), eps=1e-7, weight_decay=0)
+   #optimizer = Lamb(train_params,  lr= self.lr, betas=(0.9, 0.999), eps=1e-7, weight_decay=0)
+    optimizer = apex.optimizers.FusedLAMB(train_params,  lr= self.lr, betas=(0.9, 0.999), eps=1e-7)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=self.gamma)
     return [optimizer], [scheduler]
