@@ -1,7 +1,7 @@
 import ranger
 import torch
 import apex
-from apex.parallel import LARC
+from apex.parallel.LARC import LARC
 from torch import nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
