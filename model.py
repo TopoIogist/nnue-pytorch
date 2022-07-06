@@ -351,7 +351,7 @@ class NNUE(pl.LightningModule):
  #   optimizer = ranger.Ranger(train_params, betas=(.9, 0.999), eps=1.0e-7, gc_loc=False, use_gc=False)
    #optimizer = Lamb(train_params,  lr= self.lr, betas=(0.9, 0.999), eps=1e-7, weight_decay=0)
     optimizer = apex.optimizers.FusedAdam(train_params,  lr= self.lr, betas=(0.9, 0.999), eps=1e-7)
-    optimizer = apex.parallel.LARC(optim)
-    optimizer = apex.fp16_utils.FP16_Optimizer(optim)
+    optimizer = apex.parallel.LARC(optimizer)
+    optimizer = apex.fp16_utils.FP16_Optimizer(optimizer)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=self.gamma)
     return [optimizer], [scheduler]
