@@ -1,7 +1,5 @@
-import ranger
+import ranger21
 import torch
-import apex
-from apex.parallel.LARC import LARC
 from torch import nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
@@ -349,9 +347,10 @@ class NNUE(pl.LightningModule):
     ]
     # Increasing the eps leads to less saturated nets with a few dead neurons.
     # Gradient localisation appears slightly harmful.
- #   optimizer = ranger.Ranger(train_params, betas=(.9, 0.999), eps=1.0e-7, gc_loc=False, use_gc=False)
+   #optimizer = ranger.Ranger(train_params, betas=(.9, 0.999), eps=1.0e-7, gc_loc=False, use_gc=False)
+   optimizer = ranger21.Ranger21(train_params, betas=(.9, 0.999), eps=1.0e-7, use_gc=False, num_epochs=self.max_epoch)
    #optimizer = Lamb(train_params,  lr= self.lr, betas=(0.9, 0.999), eps=1e-7, weight_decay=0)
-    optimizer = apex.optimizers.FusedAdam(train_params,  lr= self.lr, betas=(0.9, 0.999), eps=1e-7)
+   # optimizer = apex.optimizers.FusedAdam(train_params,  lr= self.lr, betas=(0.9, 0.999), eps=1e-7)
     #optimizer = LARC(optimizer)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=self.gamma)
     return [optimizer], [scheduler]
