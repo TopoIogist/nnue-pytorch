@@ -35,6 +35,9 @@ class LayerStacks(nn.Module):
     self.l1_fact = nn.Linear(2 * L1 // 2, L2 + 1, bias=True)
     self.l2 = nn.Linear(L2*2, L3 * count)
     self.output = nn.Linear(L3, 1 * count)
+    
+    # Used to improve generalization of net
+    self.dropout = nn.Dropout(p=0.1)
 
     # Cached helper tensor for choosing outputs by bucket indices.
     # Initialized lazily in forward.
@@ -80,7 +83,7 @@ class LayerStacks(nn.Module):
 
     indices = ls_indices.flatten() + self.idx_offset
 
-    l1s_ = self.l1(x).reshape((-1, self.count, L2 + 1))
+    l1s_ = self.dropout(self.l1(x).reshape((-1, self.count, L2 + 1)))
     l1f_ = self.l1_fact(x)
     # https://stackoverflow.com/questions/55881002/pytorch-tensor-indexing-how-to-gather-rows-by-tensor-containing-indices
     # basically we present it as a list of individual results and pick not only based on
@@ -317,7 +320,7 @@ class NNUE(pl.LightningModule):
     actual_lambda = self.start_lambda + (self.end_lambda - self.start_lambda) * (self.current_epoch / self.max_epoch)
     pt = pf * actual_lambda + t * (1.0 - actual_lambda)
     
-    loss = torch.pow(torch.abs(pt - qf), 3.0).mean()
+    loss = torch.pow(torch.abs(pt - qf), 2.5).mean()
 
     self.log(loss_type, loss)
 
