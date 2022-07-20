@@ -1,4 +1,5 @@
 import ranger
+import ranger21
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -342,6 +343,7 @@ class NNUE(pl.LightningModule):
     ]
     # Increasing the eps leads to less saturated nets with a few dead neurons.
     # Gradient localisation appears slightly harmful.
-    optimizer = ranger.Ranger(train_params, betas=(.9, 0.999), eps=1.0e-7, gc_loc=False, use_gc=False)
+    #optimizer = ranger.Ranger(train_params, betas=(.9, 0.999), eps=1.0e-7, gc_loc=False, use_gc=False)
+    optimizer = ranger21.Ranger21(train_params, lr=self.lr, betas=(.9, 0.999), eps=1.0e-7, using_gc=False, num_epochs=self.max_epoch, num_batches_per_epoch=16384)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=self.gamma)
     return [optimizer], [scheduler]
