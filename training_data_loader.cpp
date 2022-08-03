@@ -919,87 +919,6 @@ std::function<bool(const TrainingDataEntry&)> make_skip_predicate(bool filtered,
     return nullptr;
 }
 
-char flipcase(char x) {
-    if (::isalpha(x)) {
-        return x ^ 32;
-    }
-    return x;
-}
-
-std::string flip_castling_rights(std::string_view old_rights) {
-    bool hasK = false, hasQ = false, hask = false, hasq = false;
-    std::string res = "";
-    for (std::size_t i = 0; i < old_rights.size(); ++i) {
-        if (old_rights[i] == 'K') hasK = true;
-        if (old_rights[i] == 'Q') hasQ = true;
-        if (old_rights[i] == 'k') hask = true;
-        if (old_rights[i] == 'q') hasq = true;
-    }
-    if (!hasK && !hasQ && !hask && !hasq) return res;
-
-    if (hask) res = res + 'K';
-    if (hasq) res = res + 'Q';
-    if (hasK) res = res + 'k';
-    if (hasQ) res = res + 'q';
-    return res;
-}
-
-std::string flip_side(std::string_view old_side) {
-    if (!old_side.compare("b")) return "w";
-    return "b";
-}
-
-void reverse_parts(std::string& str) {
-    std::size_t n = str.size();
-    std::reverse(begin(str), end(str));
-    int j, i = 0;
-    while (i < n) {
-        j = i;
-        while ((i < n) && (str[i] != '/')) i++;
-        std::reverse(begin(str) + j, begin(str) + i);
-        i++;
-    }
-}
-
-std::string flip_pos(std::string_view old_pos) {
-    std::string res{ old_pos };
-    std::transform(res.begin(), res.end(), res.begin(), flipcase);
-    reverse_parts(res);
-    return res;
-}
-
-void reverse_fen(std::string& result, int const group, std::string_view fen) {
-    auto nextPart = [fen, start = std::size_t{ 0 }]() mutable {
-        std::size_t end = fen.find(' ', start);
-        if (end == std::string::npos)
-        {
-            std::string_view substr = fen.substr(start);
-            start = fen.size();
-            return substr;
-        }
-        else
-        {
-            std::string_view substr = fen.substr(start, end - start);
-            start = end + 1; // to skip whitespace
-            return substr;
-        }
-    };
-    const auto pos = nextPart();
-    const auto side = nextPart();
-    const auto castling_rights = nextPart();
-    const auto ep_square = nextPart();
-    const auto rule50 = nextPart();
-    const auto full_move = nextPart();
-    result = flip_pos(pos) + " " + flip_side(side) + " " + flip_castling_rights(castling_rights)
-        + " " + std::string{ ep_square } + " " + std::string{ rule50 } + " " + std::string{ full_move };
-}
-
-std::string reverse_fen(char const* orig_fen) {
-    std::string result = "";
-    reverse_fen(result, 0, orig_fen);
-    return result;
-}
-
 extern "C" {
 
     EXPORT SparseBatch* get_sparse_batch_from_fens(
@@ -1155,7 +1074,7 @@ extern "C" {
 
 int main()
 {
-    auto stream = create_sparse_batch_stream("HalfKP", 4, "10m_d3_q_2.binpack", 8192, true, false, 0, false, 0);
+    /*auto stream = create_sparse_batch_stream("HalfKP", 4, "10m_d3_q_2.binpack", 8192, true, false, 0, false, 0);
     auto t0 = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < 1000; ++i)
     {
@@ -1163,6 +1082,8 @@ int main()
         destroy_sparse_batch(stream->next());
     }
     auto t1 = std::chrono::high_resolution_clock::now();
-    std::cout << (t1 - t0).count() / 1e9 << "s\n";
+    std::cout << (t1 - t0).count() / 1e9 << "s\n";*/
+    
+    convertBinpackToBinpack("/mnt/z/chess_data/Leela-dfrc_n5000.binpack", "/mnt/z/chess_data/Leela_dfrc_mirrored.binpack", std::ios_base::trunc);
 }
 //*/
