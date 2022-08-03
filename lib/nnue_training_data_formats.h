@@ -8016,7 +8016,7 @@ namespace binpack
                 return;
             }
             TrainingDataEntry em;
-            em.pos = chess::Position::fromFen(reverse_fen(e.pos.fen()));
+            em.pos = chess::Position::fromFen(reverse_fen(e.pos.fen().c_str()));
             em.score = e.score;
             em.ply = e.ply;
             em.result = e.result;
@@ -8029,7 +8029,7 @@ namespace binpack
             const auto cur = inputFile.tellg();
             if (numProcessedPositions % reportEveryNPositions == 0)
             {
-                std::cout << "Processed " << (cur - base) << " bytes and " << numProcessedPositions << " positions.\n";
+                std::cout << "Processed " numProcessedPositions << " positions.\n";
             }
         }
 
