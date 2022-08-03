@@ -1084,6 +1084,6 @@ int main()
     auto t1 = std::chrono::high_resolution_clock::now();
     std::cout << (t1 - t0).count() / 1e9 << "s\n";*/
     
-    convertBinpackToBinpack("/mnt/z/chess_data/Leela-dfrc_n5000.binpack", "/mnt/z/chess_data/Leela_dfrc_mirrored.binpack", std::ios_base::trunc);
+    convertBinpackToBinpack("/mnt/z/chess_data/Leela-dfrc_n5000.binpack", "/mnt/z/chess_data/Leela_dfrc_mirrored.binpack", std::ios_base::trunc, false);
 }
 //*/
