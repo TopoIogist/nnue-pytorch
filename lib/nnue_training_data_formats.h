@@ -7996,6 +7996,21 @@ namespace binpack
         reverse_fen(result, 0, orig_fen);
         return result;
     }
+    
+    inline std::string mirror_move(char const* move) {
+        std::string result = "";
+        int i = 0;
+        while (move[i]) {
+            if (move[i] >= '1' && move[i] <= '8') {
+                result += ('1' + ('8' - move[i]));
+            }
+            else {
+                result += move[i];
+            }
+            ++i;
+        }
+        return result;
+    }
 
     inline void convertBinpackToBinpack(std::string inputPath, std::string outputPath, std::ios_base::openmode om, bool validate)
     {
@@ -8007,6 +8022,10 @@ namespace binpack
         CompressedTrainingDataEntryReader reader(inputPath);
         CompressedTrainingDataEntryWriter writer(outputPath, om);
         std::size_t numProcessedPositions = 0;
+        std::string cur_pos = "";
+        std::string last_pos = "";
+        std::vector<TrainingDataEntry> em_batch;
+        TrainingDataEntry last;
 
         while(reader.hasNext())
         {
@@ -8017,15 +8036,26 @@ namespace binpack
                 return;
             }
             TrainingDataEntry em;
+            cur_pos = e.pos.fen();
             em.pos = chess::Position::fromFen(reverse_fen(e.pos.fen().c_str()));
             em.score = e.score;
             em.ply = e.ply;
             em.result = e.result;
-            em.move = e.move;
+            std::string nm = mirror_move(chess::uci::moveToUci(e.pos, e.move));
+            em.move = chess::uci::uciToMove(em.pos, nm);
+            
+            
+            if (!isContinuation(last, e)) {
+                //Position changed, flush em cache
+                for(std::size_t i = 0; i < em_batch.size(); ++i) {
+                    writer.addTrainingDataEntry(em_batch[i]);
+                }
+                em_batch.clear();   
+            }
+            last = e;
             
 
             writer.addTrainingDataEntry(e);
-            writer.addTrainingDataEntry(em);
             ++numProcessedPositions;
             if (numProcessedPositions % reportEveryNPositions == 0)
             {
