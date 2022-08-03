@@ -7997,8 +7997,9 @@ namespace binpack
         return result;
     }
 
-     inline void convertBinpackToBinpack(std::string inputPath, std::string outputPath, std::ios_base::openmode om, bool validate)
+    inline void convertBinpackToBinpack(std::string inputPath, std::string outputPath, std::ios_base::openmode om, bool validate)
     {
+        constexpr std::size_t reportEveryNPositions = 100'000;
         constexpr std::size_t bufferSize = MiB;
 
         std::cout << "Converting " << inputPath << " to " << outputPath << '\n';
@@ -8026,10 +8027,9 @@ namespace binpack
             writer.addTrainingDataEntry(e);
             writer.addTrainingDataEntry(em);
             ++numProcessedPositions;
-            const auto cur = inputFile.tellg();
             if (numProcessedPositions % reportEveryNPositions == 0)
             {
-                std::cout << "Processed " numProcessedPositions << " positions.\n";
+                std::cout << "Processed " << numProcessedPositions << " positions.\n";
             }
         }
 
