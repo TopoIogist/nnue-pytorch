@@ -8043,6 +8043,7 @@ namespace binpack
             em.result = e.result;
             std::string nm = mirror_move(chess::uci::moveToUci(e.pos, e.move).c_str());
             em.move = chess::uci::uciToMove(em.pos, nm);
+            em_batch.push_back(em);
             
             
             if (!isContinuation(last, e)) {

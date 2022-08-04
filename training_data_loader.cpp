@@ -1072,8 +1072,12 @@ extern "C" {
 /* benches */ //*
 #include <chrono>
 
-int main()
+int main(int argc, char *argv[])
 {
+    if(argc < 2) {
+        std::cout << "BAD" << std::endl;
+        return 1;
+    }
     /*auto stream = create_sparse_batch_stream("HalfKP", 4, "10m_d3_q_2.binpack", 8192, true, false, 0, false, 0);
     auto t0 = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < 1000; ++i)
@@ -1083,7 +1087,10 @@ int main()
     }
     auto t1 = std::chrono::high_resolution_clock::now();
     std::cout << (t1 - t0).count() / 1e9 << "s\n";*/
+    int n = atoi (argv[1]);
+    std::string input_file = "/mnt/z/chess_data/tmp/split_"+std::to_string(n)+".binpack";
+    std::string output_file = "/mnt/z/chess_data/tmp/Leela_dfrc_mirrored_p_"+std::to_string(n)+".binpack";
     
-    convertBinpackToBinpack("/mnt/z/chess_data/Leela-dfrc_n5000.binpack", "/mnt/z/chess_data/Leela_dfrc_mirrored.binpack", std::ios_base::trunc, false);
+    convertBinpackToBinpack(input_file.c_str(), output_file.c_str(), std::ios_base::trunc, false);
 }
 //*/
